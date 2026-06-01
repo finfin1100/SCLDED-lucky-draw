@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export default function Home() {
   const [namesText, setNamesText] = useState(
@@ -11,6 +11,7 @@ export default function Home() {
   const [winner, setWinner] = useState<string[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
+  const historyRef = useRef<string[]>([]);
 
   const names = useMemo(() => {
     return namesText
@@ -19,41 +20,68 @@ export default function Home() {
       .filter(Boolean);
   }, [namesText]);
 
+  const shuffle = (list: string[]) => {
+    const arr = [...list];
+
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+
+    return arr;
+  };
+
   const draw = () => {
-    if (names.length < 2 || isDrawing) return;
+    const uniqueNames = [...new Set(names.map((name) => name.trim()))];
+
+    if (uniqueNames.length < 2 || isDrawing) return;
 
     setWinner([]);
     setIsDrawing(true);
 
+    const blockedPeople = historyRef.current
+      .slice(-4)
+      .flatMap((record) =>
+        record.split(" × ").map((name) => name.trim())
+      );
+
+    const blockedSet = new Set(blockedPeople);
+
+    const availableNames =
+      uniqueNames.length >= 10
+        ? uniqueNames.filter((name) => !blockedSet.has(name))
+        : uniqueNames;
+
+    const pool =
+      uniqueNames.length >= 10 && availableNames.length >= 2
+        ? availableNames
+        : uniqueNames;
+
+    const finalWinners = shuffle(pool).slice(0, 2);
+
     let count = 0;
 
     const interval = setInterval(() => {
-      const shuffled = [...names].sort(() => Math.random() - 0.5);
-
-      const randomTwo = shuffled.slice(0, 2);
-
-      setDisplayName(randomTwo.join(" × "));
+      const preview = shuffle(pool).slice(0, 2);
+      setDisplayName(preview.join(" × "));
 
       count++;
 
       if (count > 45) {
         clearInterval(interval);
 
-        const finalShuffle = [...names].sort(
-          () => Math.random() - 0.5
-        );
+        const newRecord = finalWinners.join(" × ");
 
-        const winners = finalShuffle.slice(0, 2);
+        const nextHistory = [
+          ...historyRef.current,
+          newRecord,
+        ];
 
-        setWinner(winners);
+        historyRef.current = nextHistory;
 
-        setDisplayName(winners.join(" × "));
-
-        setHistory((prev) => [
-          winners.join(" × "),
-          ...prev,
-        ].slice(0, 6));
-
+        setWinner(finalWinners);
+        setDisplayName(newRecord);
+        setHistory(nextHistory);
         setIsDrawing(false);
       }
     }, 80);
