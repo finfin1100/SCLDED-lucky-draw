@@ -29,31 +29,20 @@ export default function Home() {
 
     const interval = setInterval(() => {
       const shuffled = [...names].sort(() => Math.random() - 0.5);
-
       const randomTwo = shuffled.slice(0, 2);
 
       setDisplayName(randomTwo.join(" × "));
-
       count++;
 
       if (count > 45) {
         clearInterval(interval);
 
-        const finalShuffle = [...names].sort(
-          () => Math.random() - 0.5
-        );
-
+        const finalShuffle = [...names].sort(() => Math.random() - 0.5);
         const winners = finalShuffle.slice(0, 2);
 
         setWinner(winners);
-
         setDisplayName(winners.join(" × "));
-
-        setHistory((prev) => [
-          winners.join(" × "),
-          ...prev,
-        ].slice(0, 6));
-
+        setHistory((prev) => [winners.join(" × "), ...prev].slice(0, 6));
         setIsDrawing(false);
       }
     }, 80);
@@ -61,19 +50,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#020711] text-white overflow-hidden relative">
-
-      {/* Background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.07)_1px,transparent_1px)] bg-[size:32px_32px]" />
-
       <div className="absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full bg-cyan-500/10 blur-[140px]" />
-
       <div className="absolute bottom-0 right-0 w-[620px] h-[620px] rounded-full bg-yellow-500/10 blur-[160px]" />
 
       <div className="relative z-10 max-w-[1500px] mx-auto p-6 grid lg:grid-cols-[310px_1fr] gap-6">
-
-        {/* LEFT PANEL */}
         <div className="rounded-2xl border border-cyan-400/30 bg-slate-950/80 p-5">
-
           <div className="text-cyan-300 tracking-[0.25em] text-sm mb-8 whitespace-nowrap">
             LAYOUT TEAM SYSTEM
           </div>
@@ -82,15 +64,12 @@ export default function Home() {
             SCLDED
           </div>
 
-          <div className="text-xl font-bold mb-6">
+          <div className="text-lg font-bold mb-6 whitespace-nowrap text-cyan-200">
             LUCKY DRAW
           </div>
 
           <div className="border-t border-cyan-400/30 pt-5">
-
-            <div className="text-cyan-300 text-sm mb-3">
-              ENGINEER LIST
-            </div>
+            <div className="text-cyan-300 text-sm mb-3">ENGINEER LIST</div>
 
             <div className="text-white/60 text-sm mb-3">
               一行一位 layout engineer
@@ -107,14 +86,13 @@ export default function Home() {
               disabled={isDrawing || names.length < 2}
               className="mt-6 w-full py-4 rounded-lg text-lg font-black bg-cyan-400/90 text-black hover:bg-cyan-200 transition-all shadow-[0_0_30px_rgba(34,211,238,.55)] disabled:opacity-40"
             >
-              {isDrawing ? "ROUTING..." : "START ROUTING"}
+              {isDrawing ? "COMPARING..." : "START LVS"}
             </button>
           </div>
 
           <div className="mt-6 border-t border-cyan-400/30 pt-5">
-
             <div className="text-cyan-300 text-sm mb-3">
-              ROUTING HISTORY
+              COMPARE HISTORY
             </div>
 
             <div className="space-y-2">
@@ -123,10 +101,7 @@ export default function Home() {
                   key={i}
                   className="border border-cyan-400/20 bg-black/30 rounded px-3 py-2 font-mono text-sm flex justify-between"
                 >
-                  <span>
-                    CELL-{String(i + 1).padStart(3, "0")}
-                  </span>
-
+                  <span>CELL-{String(i + 1).padStart(3, "0")}</span>
                   <span>{h}</span>
                 </div>
               ))}
@@ -134,16 +109,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
         <div className="relative rounded-2xl border border-cyan-400/30 bg-[#03101f]/90 p-8 overflow-hidden">
-
           <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,.08)_1px,transparent_1px)] bg-[size:28px_28px]" />
 
           <div className="relative z-10 space-y-7">
-
-            {/* INPUT */}
             <section className="border border-cyan-400/25 bg-black/20 rounded-xl p-6 overflow-hidden">
-
               <div className="text-sm font-black text-cyan-300 mb-3">
                 INPUT A
                 <span className="ml-2 text-sm font-normal text-cyan-200">
@@ -152,38 +122,13 @@ export default function Home() {
               </div>
 
               <div className="relative">
-
                 <div className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-cyan-200/40 to-transparent animate-[scan_1.6s_linear_infinite]" />
 
                 <svg width="100%" height="115" viewBox="0 0 1000 115">
-
-                  <line
-                    x1="70"
-                    y1="85"
-                    x2="960"
-                    y2="85"
-                    stroke="#164e63"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <line
-                    x1="70"
-                    y1="25"
-                    x2="960"
-                    y2="25"
-                    stroke="#164e63"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <text x="0" y="35" fill="#67e8f9" fontSize="22">
-                    1
-                  </text>
-
-                  <text x="0" y="90" fill="#67e8f9" fontSize="22">
-                    0
-                  </text>
+                  <line x1="70" y1="85" x2="960" y2="85" stroke="#164e63" strokeWidth="2" strokeDasharray="8 8" />
+                  <line x1="70" y1="25" x2="960" y2="25" stroke="#164e63" strokeWidth="2" strokeDasharray="8 8" />
+                  <text x="0" y="35" fill="#67e8f9" fontSize="22">1</text>
+                  <text x="0" y="90" fill="#67e8f9" fontSize="22">0</text>
 
                   <path
                     d="M80 85 L170 85 L170 25 L300 25 L300 85 L430 85 L430 25 L560 25 L560 85 L690 85 L690 25 L820 25 L820 85 L940 85"
@@ -197,84 +142,142 @@ export default function Home() {
               </div>
             </section>
 
-            {/* CENTER */}
-            <section className="relative border border-cyan-400/30 rounded-2xl bg-black/30 min-h-[330px] flex flex-col items-center justify-center shadow-[0_0_45px_rgba(34,211,238,.12)] overflow-hidden">
+            <section className="relative border border-cyan-400/30 rounded-2xl bg-black/30 min-h-[420px] overflow-hidden shadow-[0_0_45px_rgba(34,211,238,.12)]">
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.05)_1px,transparent_1px)] bg-[size:24px_24px]" />
 
-              <div className="absolute inset-0 opacity-40 bg-[linear-gradient(90deg,transparent,rgba(34,211,238,.12),transparent)] animate-[scan_2s_linear_infinite]" />
-
-              <div className="absolute top-5 text-cyan-300 tracking-[0.25em] text-sm font-black">
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 text-cyan-300 tracking-[0.3em] text-sm font-black z-20">
                 {isDrawing
-                  ? "SIGNAL PROPAGATING"
+                  ? "LVS COMPARE RUNNING"
                   : winner.length
-                  ? "FINAL WINNER"
-                  : "WAITING RESULT"}
+                  ? "LVS MATCH"
+                  : "WAITING FOR LVS"}
               </div>
 
-              {isDrawing ? (
-                <div className="text-3xl md:text-5xl lg:text-6xl font-black text-cyan-300 animate-pulse text-center break-words px-4">
-                  {displayName}
+              <div className="absolute top-[70px] left-[40px] right-[40px] grid grid-cols-[1fr_180px_1fr] gap-6 z-10">
+                <div className="rounded-xl border border-cyan-400/30 bg-black/40 p-4">
+                  <div className="text-cyan-300 font-mono text-sm mb-3">
+                    SCHEMATIC NETLIST
+                  </div>
+
+                  {["M_PU", "M_PD", "NET_A", "NET_Y", "VDD", "VSS"].map(
+                    (net, index) => (
+                      <div
+                        key={net}
+                        className={`font-mono text-sm py-1 ${
+                          isDrawing
+                            ? "animate-[comparePulse_1.2s_linear_infinite]"
+                            : ""
+                        }`}
+                        style={{ animationDelay: `${index * 0.15}s` }}
+                      >
+                        {index % 2 === 0 ? "🟦" : "🟩"} {net}
+                      </div>
+                    )
+                  )}
                 </div>
-              ) : winner.length ? (
-                <>
-                  <div className="text-6xl md:text-8xl lg:text-[100px] break-words max-w-full px-4 leading-none font-black text-yellow-300 drop-shadow-[0_0_40px_rgba(250,204,21,.9)] text-center">
+
+                <div className="flex flex-col items-center justify-center gap-3">
+                  {isDrawing ? (
+                    <>
+                      <div className="text-yellow-300 font-mono text-sm animate-pulse">
+                        COMPARE
+                      </div>
+                      <div className="text-5xl animate-pulse">⇄</div>
+                      <div className="text-cyan-300 font-mono text-xs">
+                        checking devices / nets
+                      </div>
+                    </>
+                  ) : winner.length ? (
+                    <>
+                      <div className="text-green-300 font-mono text-sm">
+                        MATCH
+                      </div>
+                      <div className="text-5xl">✅</div>
+                      <div className="text-green-300 font-mono text-xs">
+                        no shorts / no opens
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-cyan-300 font-mono text-sm">
+                        READY
+                      </div>
+                      <div className="text-5xl">⇄</div>
+                      <div className="text-white/40 font-mono text-xs">
+                        waiting input
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-yellow-400/30 bg-black/40 p-4">
+                  <div className="text-yellow-300 font-mono text-sm mb-3">
+                    LAYOUT EXTRACTED
+                  </div>
+
+                  {["M_PU", "M_PD", "NET_A", "NET_Y", "VDD", "VSS"].map(
+                    (net, index) => (
+                      <div
+                        key={net}
+                        className={`font-mono text-sm py-1 ${
+                          isDrawing
+                            ? "animate-[comparePulse_1.2s_linear_infinite]"
+                            : ""
+                        }`}
+                        style={{ animationDelay: `${index * 0.15 + 0.2}s` }}
+                      >
+                        {index % 2 === 0 ? "🟨" : "🟧"} {net}
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {isDrawing && (
+                <div className="absolute inset-x-0 bottom-[72px] flex justify-center px-6">
+                  <div className="text-3xl md:text-5xl lg:text-6xl font-black text-cyan-300 animate-pulse text-center break-words">
+                    {displayName}
+                  </div>
+                </div>
+              )}
+
+              {!isDrawing && !winner.length && (
+                <div className="absolute inset-x-0 bottom-[80px] text-center">
+                  <div className="text-5xl font-black text-cyan-300">
+                    READY TO COMPARE
+                  </div>
+                </div>
+              )}
+
+              {winner.length > 0 && !isDrawing && (
+                <div className="absolute inset-x-0 bottom-[52px] flex flex-col items-center justify-center">
+                  <div className="text-5xl md:text-7xl lg:text-[96px] leading-none font-black text-yellow-300 drop-shadow-[0_0_40px_rgba(250,204,21,.9)] text-center break-words max-w-full px-4 z-10">
                     {winner.join(" × ")}
                   </div>
 
-                  <div className="mt-10 text-2xl text-cyan-100">
-                    DRC PASS ✓　LVS CLEAN ✓
+                  <div className="mt-7 text-xl text-cyan-100 z-10">
+                    LVS MATCH ✓　NO SHORT ✓　NO OPEN ✓
                   </div>
-                </>
-              ) : (
-                <div className="text-6xl font-black text-cyan-300">
-                  READY TO ROUTE
                 </div>
               )}
             </section>
 
-            {/* OUTPUT */}
             <section className="border border-cyan-400/25 bg-black/20 rounded-xl p-6 overflow-hidden">
-
               <div className="text-sm font-black text-yellow-300 mb-3">
                 OUTPUT Y
-
                 <span className="ml-2 text-sm font-normal text-yellow-200">
                   （1 → 0 → 1，INVERTED）
                 </span>
               </div>
 
               <div className="relative">
-
                 <div className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-yellow-200/40 to-transparent animate-[scan_1.6s_linear_infinite]" />
 
                 <svg width="100%" height="115" viewBox="0 0 1000 115">
-
-                  <line
-                    x1="70"
-                    y1="85"
-                    x2="960"
-                    y2="85"
-                    stroke="#713f12"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <line
-                    x1="70"
-                    y1="25"
-                    x2="960"
-                    y2="25"
-                    stroke="#713f12"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <text x="0" y="35" fill="#fde047" fontSize="22">
-                    1
-                  </text>
-
-                  <text x="0" y="90" fill="#fde047" fontSize="22">
-                    0
-                  </text>
+                  <line x1="70" y1="85" x2="960" y2="85" stroke="#713f12" strokeWidth="2" strokeDasharray="8 8" />
+                  <line x1="70" y1="25" x2="960" y2="25" stroke="#713f12" strokeWidth="2" strokeDasharray="8 8" />
+                  <text x="0" y="35" fill="#fde047" fontSize="22">1</text>
+                  <text x="0" y="90" fill="#fde047" fontSize="22">0</text>
 
                   <path
                     d="M80 25 L170 25 L170 85 L300 85 L300 25 L430 25 L430 85 L560 85 L560 25 L690 25 L690 85 L820 85 L820 25 L940 25"
@@ -288,9 +291,7 @@ export default function Home() {
               </div>
             </section>
 
-            {/* STATUS BAR */}
             <div className="relative h-[54px] overflow-hidden">
-
               {[
                 ["⚙️", "AUTO PLACE & ROUTE", "📈", "SIGNAL PROPAGATION", "🛡️", "RESULT STABLE"],
                 ["🎯", "FLOORPLAN", "🔀", "ROUTING OPTIMIZATION", "✅", "TIMING CLEAN"],
@@ -302,28 +303,21 @@ export default function Home() {
                 <div
                   key={index}
                   className="absolute inset-0 border border-cyan-400/30 rounded-xl px-4 py-3 grid grid-cols-[1.2fr_40px_1.2fr_40px_1.2fr_60px] items-center font-mono text-cyan-300 bg-black/20 opacity-0 animate-[statusCycle_12s_linear_infinite]"
-                  style={{
-                    animationDelay: `${index * 2}s`,
-                  }}
+                  style={{ animationDelay: `${index * 2}s` }}
                 >
-
                   <span className="flex items-center justify-center gap-2 text-xs lg:text-sm whitespace-nowrap">
                     <span>{item[0]}</span>
                     <span>{item[1]}</span>
                   </span>
 
-                  <span className="text-center text-cyan-400">
-                    &gt;&gt;&gt;
-                  </span>
+                  <span className="text-center text-cyan-400">&gt;&gt;&gt;</span>
 
                   <span className="flex items-center justify-center gap-2 text-xs lg:text-sm whitespace-nowrap">
                     <span>{item[2]}</span>
                     <span>{item[3]}</span>
                   </span>
 
-                  <span className="text-center text-cyan-400">
-                    &gt;&gt;&gt;
-                  </span>
+                  <span className="text-center text-cyan-400">&gt;&gt;&gt;</span>
 
                   <span className="flex items-center justify-center gap-2 text-xs lg:text-sm whitespace-nowrap">
                     <span>{item[4]}</span>
@@ -390,6 +384,23 @@ export default function Home() {
           100% {
             opacity: 0;
             transform: translateY(-18px);
+          }
+        }
+
+        @keyframes comparePulse {
+          0% {
+            opacity: 0.35;
+            transform: translateX(-4px);
+          }
+
+          50% {
+            opacity: 1;
+            transform: translateX(4px);
+          }
+
+          100% {
+            opacity: 0.35;
+            transform: translateX(-4px);
           }
         }
       `}</style>
