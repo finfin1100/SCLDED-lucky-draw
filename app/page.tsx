@@ -2,9 +2,29 @@
 
 import { useMemo, useRef, useState } from "react";
 
+import LeftPanel from "@/components/LeftPanel";
+import RandomDraw from "@/components/RandomDraw";
+import ScopePanel from "@/components/ScopePanel";
+import WheelDraw from "@/components/WheelDraw";
+
+import type { DrawMode } from "@/types/draw";
+
+import {
+  createHistoryRecord,
+  getAvailableNames,
+  getUniqueNames,
+  shuffle,
+} from "@/utils/drawUtils";
+
+import {
+  createRandomWheelRotation,
+  createRandomPointerRotation,
+  getWinnersFromPointers,
+} from "@/utils/wheelUtils";
+
 export default function Home() {
   const [namesText, setNamesText] = useState(
-    "阿明\n小美\n志豪\n怡君\n建宏\n雅婷"
+    "FIN\n上軒\n有銘\n聖棋\n博之\n偉嘉\n嘉嶸\n宜潔\n薾云\n宜鳳\n雅玲\n江瑋\n平心\nPro Max\n棋淵\n隱1\n隱2\n隱3\n隱4\n隱5"
   );
 
   const [displayName, setDisplayName] = useState("");
@@ -13,6 +33,16 @@ export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
   const historyRef = useRef<string[]>([]);
 
+  const [drawMode, setDrawMode] =
+    useState<DrawMode>("random");
+
+  const [wheelRotation, setWheelRotation] =
+    useState(0);
+  const [pointerRotation, setPointerRotation] =
+  useState(0);
+  const [activeWheelNames, setActiveWheelNames] =
+    useState<string[]>([]);
+
   const names = useMemo(() => {
     return namesText
       .split("\n")
@@ -20,44 +50,82 @@ export default function Home() {
       .filter(Boolean);
   }, [namesText]);
 
-  const shuffle = (list: string[]) => {
-    const arr = [...list];
-
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-
-    return arr;
-  };
-
   const draw = () => {
-    const uniqueNames = [...new Set(names.map((name) => name.trim()))];
+    const uniqueNames = getUniqueNames(names);
 
     if (uniqueNames.length < 2 || isDrawing) return;
+
+    const pool = getAvailableNames(
+      uniqueNames,
+      historyRef.current
+    );
+
+    if (pool.length < 2) {
+      setWinner([]);
+      setDisplayName("人數不足，請按 F5 重新開始");
+      return;
+    }
 
     setWinner([]);
     setIsDrawing(true);
 
-    const blockedPeople = historyRef.current
-      .slice(-4)
-      .flatMap((record) =>
-        record.split(" × ").map((name) => name.trim())
-      );
-
-    const blockedSet = new Set(blockedPeople);
-
-    const availableNames =
-      uniqueNames.length >= 10
-        ? uniqueNames.filter((name) => !blockedSet.has(name))
-        : uniqueNames;
-
-    const pool =
-      uniqueNames.length >= 10 && availableNames.length >= 2
-        ? availableNames
-        : uniqueNames;
-
     const finalWinners = shuffle(pool).slice(0, 2);
+
+    if (drawMode === "wheel") {
+      setDisplayName("WHEEL SPINNING...");
+      setActiveWheelNames(pool);
+
+      const targetRotation =
+        createRandomWheelRotation(wheelRotation);
+
+      const targetPointerRotation =
+        createRandomPointerRotation(
+          pool,
+          targetRotation,
+          pointerRotation
+        );
+
+      setWheelRotation(targetRotation);
+      setPointerRotation(targetPointerRotation);
+
+      setTimeout(() => {
+        let actualWinners = getWinnersFromPointers(
+          pool,
+          targetRotation,
+          targetPointerRotation
+        );
+
+        if (actualWinners[0] === actualWinners[1]) {
+          const firstWinnerIndex = pool.indexOf(actualWinners[0]);
+
+          const secondWinner = pool.find(
+            (_, index) => index !== firstWinnerIndex
+          );
+
+          actualWinners = [
+            actualWinners[0],
+            secondWinner!,
+          ];
+        }
+
+        const newRecord =
+          createHistoryRecord(actualWinners);
+
+        const nextHistory = [
+          ...historyRef.current,
+          newRecord,
+        ];
+
+        historyRef.current = nextHistory;
+
+        setWinner(actualWinners);
+        setDisplayName(newRecord);
+        setHistory(nextHistory);
+        setIsDrawing(false);
+      }, 7500);
+
+      return;
+    }
 
     let count = 0;
 
@@ -70,7 +138,8 @@ export default function Home() {
       if (count > 45) {
         clearInterval(interval);
 
-        const newRecord = finalWinners.join(" × ");
+        const newRecord =
+          createHistoryRecord(finalWinners);
 
         const nextHistory = [
           ...historyRef.current,
@@ -86,11 +155,12 @@ export default function Home() {
       }
     }, 80);
   };
-
-  return (
+const wheelDisplayNames =
+  activeWheelNames.length > 0
+    ? activeWheelNames
+    : getAvailableNames(names, history);
+    return (
     <div className="min-h-screen bg-[#020711] text-white overflow-hidden relative">
-
-      {/* Background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.07)_1px,transparent_1px)] bg-[size:32px_32px]" />
 
       <div className="absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full bg-cyan-500/10 blur-[140px]" />
@@ -98,280 +168,44 @@ export default function Home() {
       <div className="absolute bottom-0 right-0 w-[620px] h-[620px] rounded-full bg-yellow-500/10 blur-[160px]" />
 
       <div className="relative z-10 max-w-[1500px] mx-auto p-6 grid lg:grid-cols-[310px_1fr] gap-6">
+        <LeftPanel
+          namesText={namesText}
+          setNamesText={setNamesText}
+          drawMode={drawMode}
+          setDrawMode={setDrawMode}
+          history={history}
+          onDraw={draw}
+          isDrawing={isDrawing}
+          namesCount={names.length}
+        />
 
-        {/* LEFT PANEL */}
-        <div className="rounded-2xl border border-cyan-400/30 bg-slate-950/80 p-5">
-
-          <div className="text-cyan-300 tracking-[0.25em] text-sm mb-8 whitespace-nowrap">
-            LAYOUT TEAM SYSTEM
-          </div>
-
-          <div className="text-3xl font-black mb-1 whitespace-nowrap">
-            SCLDED
-          </div>
-
-          <div className="text-xl font-bold mb-6">
-            LUCKY DRAW
-          </div>
-
-          <div className="border-t border-cyan-400/30 pt-5">
-
-            <div className="text-cyan-300 text-sm mb-3">
-              ENGINEER LIST
-            </div>
-
-            <div className="text-white/60 text-sm mb-3">
-              一行一位 layout engineer
-            </div>
-
-            <textarea
-              value={namesText}
-              onChange={(e) => setNamesText(e.target.value)}
-              className="w-full h-60 rounded-lg bg-[#061626] border border-cyan-400/40 p-3 outline-none focus:border-cyan-200 font-mono"
+        <ScopePanel
+          isDrawing={isDrawing}
+          winner={winner}
+        >
+          {drawMode === "wheel" ? (
+            <WheelDraw
+              names={wheelDisplayNames}
+              isDrawing={isDrawing}
+              winner={winner}
+              displayName={displayName}
+              wheelRotation={wheelRotation}
+              pointerRotation={pointerRotation}
             />
-
-            <button
-              onClick={draw}
-              disabled={isDrawing || names.length < 2}
-              className="mt-6 w-full py-4 rounded-lg text-lg font-black bg-cyan-400/90 text-black hover:bg-cyan-200 transition-all shadow-[0_0_30px_rgba(34,211,238,.55)] disabled:opacity-40"
-            >
-              {isDrawing ? "ROUTING..." : "START ROUTING"}
-            </button>
-          </div>
-
-          <div className="mt-6 border-t border-cyan-400/30 pt-5">
-
-            <div className="text-cyan-300 text-sm mb-3">
-              ROUTING HISTORY
-            </div>
-
-            <div className="space-y-2">
-              {history.map((h, i) => (
-                <div
-                  key={i}
-                  className="border border-cyan-400/20 bg-black/30 rounded px-3 py-2 font-mono text-sm flex justify-between"
-                >
-                  <span>
-                    CELL-{String(i + 1).padStart(3, "0")}
-                  </span>
-
-                  <span>{h}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className="relative rounded-2xl border border-cyan-400/30 bg-[#03101f]/90 p-8 overflow-hidden">
-
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,.08)_1px,transparent_1px)] bg-[size:28px_28px]" />
-
-          <div className="relative z-10 space-y-7">
-
-            {/* INPUT */}
-            <section className="border border-cyan-400/25 bg-black/20 rounded-xl p-6 overflow-hidden">
-
-              <div className="text-sm font-black text-cyan-300 mb-3">
-                INPUT A
-                <span className="ml-2 text-sm font-normal text-cyan-200">
-                  （0 → 1 → 0）
-                </span>
-              </div>
-
-              <div className="relative">
-
-                <div className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-cyan-200/40 to-transparent animate-[scan_1.6s_linear_infinite]" />
-
-                <svg width="100%" height="115" viewBox="0 0 1000 115">
-
-                  <line
-                    x1="70"
-                    y1="85"
-                    x2="960"
-                    y2="85"
-                    stroke="#164e63"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <line
-                    x1="70"
-                    y1="25"
-                    x2="960"
-                    y2="25"
-                    stroke="#164e63"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <text x="0" y="35" fill="#67e8f9" fontSize="22">
-                    1
-                  </text>
-
-                  <text x="0" y="90" fill="#67e8f9" fontSize="22">
-                    0
-                  </text>
-
-                  <path
-                    d="M80 85 L170 85 L170 25 L300 25 L300 85 L430 85 L430 25 L560 25 L560 85 L690 85 L690 25 L820 25 L820 85 L940 85"
-                    fill="none"
-                    stroke="#22d3ee"
-                    strokeWidth="7"
-                    strokeLinecap="square"
-                    className="waveMove"
-                  />
-                </svg>
-              </div>
-            </section>
-
-            {/* CENTER */}
-            <section className="relative border border-cyan-400/30 rounded-2xl bg-black/30 min-h-[330px] flex flex-col items-center justify-center shadow-[0_0_45px_rgba(34,211,238,.12)] overflow-hidden">
-
-              <div className="absolute inset-0 opacity-40 bg-[linear-gradient(90deg,transparent,rgba(34,211,238,.12),transparent)] animate-[scan_2s_linear_infinite]" />
-
-              <div className="absolute top-5 text-cyan-300 tracking-[0.25em] text-sm font-black">
-                {isDrawing
-                  ? "SIGNAL PROPAGATING"
-                  : winner.length
-                  ? "FINAL WINNER"
-                  : "WAITING RESULT"}
-              </div>
-
-              {isDrawing ? (
-                <div className="text-3xl md:text-5xl lg:text-6xl font-black text-cyan-300 animate-pulse text-center break-words px-4">
-                  {displayName}
-                </div>
-              ) : winner.length ? (
-                <>
-                  <div className="text-6xl md:text-8xl lg:text-[100px] break-words max-w-full px-4 leading-none font-black text-yellow-300 drop-shadow-[0_0_40px_rgba(250,204,21,.9)] text-center">
-                    {winner.join(" × ")}
-                  </div>
-
-                  <div className="mt-10 text-2xl text-cyan-100">
-                    DRC PASS ✓　LVS CLEAN ✓
-                  </div>
-                </>
-              ) : (
-                <div className="text-6xl font-black text-cyan-300">
-                  READY TO ROUTE
-                </div>
-              )}
-            </section>
-
-            {/* OUTPUT */}
-            <section className="border border-cyan-400/25 bg-black/20 rounded-xl p-6 overflow-hidden">
-
-              <div className="text-sm font-black text-yellow-300 mb-3">
-                OUTPUT Y
-
-                <span className="ml-2 text-sm font-normal text-yellow-200">
-                  （1 → 0 → 1，INVERTED）
-                </span>
-              </div>
-
-              <div className="relative">
-
-                <div className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-yellow-200/40 to-transparent animate-[scan_1.6s_linear_infinite]" />
-
-                <svg width="100%" height="115" viewBox="0 0 1000 115">
-
-                  <line
-                    x1="70"
-                    y1="85"
-                    x2="960"
-                    y2="85"
-                    stroke="#713f12"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <line
-                    x1="70"
-                    y1="25"
-                    x2="960"
-                    y2="25"
-                    stroke="#713f12"
-                    strokeWidth="2"
-                    strokeDasharray="8 8"
-                  />
-
-                  <text x="0" y="35" fill="#fde047" fontSize="22">
-                    1
-                  </text>
-
-                  <text x="0" y="90" fill="#fde047" fontSize="22">
-                    0
-                  </text>
-
-                  <path
-                    d="M80 25 L170 25 L170 85 L300 85 L300 25 L430 25 L430 85 L560 85 L560 25 L690 25 L690 85 L820 85 L820 25 L940 25"
-                    fill="none"
-                    stroke="#fde047"
-                    strokeWidth="7"
-                    strokeLinecap="square"
-                    className="waveMove"
-                  />
-                </svg>
-              </div>
-            </section>
-
-            {/* STATUS BAR */}
-            <div className="relative h-[54px] overflow-hidden">
-
-              {[
-                ["⚙️", "AUTO PLACE & ROUTE", "📈", "SIGNAL PROPAGATION", "🛡️", "RESULT STABLE"],
-                ["🎯", "FLOORPLAN", "🔀", "ROUTING OPTIMIZATION", "✅", "TIMING CLEAN"],
-                ["⚡", "POWER GRID", "🔋", "POWER ANALYSIS", "✅", "POWER STABLE"],
-                ["🔍", "DRC CHECK", "🧹", "VIOLATION FIXING", "✅", "DRC CLEAN"],
-                ["🔗", "LVS CHECK", "📄", "NETLIST COMPARE", "✅", "LVS MATCH"],
-                ["🏁", "SIGNOFF", "🚩", "SIGNOFF CHECK", "🏆", "READY FOR TAPEOUT"],
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="absolute inset-0 border border-cyan-400/30 rounded-xl px-4 py-3 grid grid-cols-[1.2fr_40px_1.2fr_40px_1.2fr_60px] items-center font-mono text-cyan-300 bg-black/20 opacity-0 animate-[statusCycle_12s_linear_infinite]"
-                  style={{
-                    animationDelay: `${index * 2}s`,
-                  }}
-                >
-
-                  <span className="flex items-center justify-center gap-2 text-xs lg:text-sm whitespace-nowrap">
-                    <span>{item[0]}</span>
-                    <span>{item[1]}</span>
-                  </span>
-
-                  <span className="text-center text-cyan-400">
-                    &gt;&gt;&gt;
-                  </span>
-
-                  <span className="flex items-center justify-center gap-2 text-xs lg:text-sm whitespace-nowrap">
-                    <span>{item[2]}</span>
-                    <span>{item[3]}</span>
-                  </span>
-
-                  <span className="text-center text-cyan-400">
-                    &gt;&gt;&gt;
-                  </span>
-
-                  <span className="flex items-center justify-center gap-2 text-xs lg:text-sm whitespace-nowrap">
-                    <span>{item[4]}</span>
-                    <span>{item[5]}</span>
-                  </span>
-
-                  <span className="text-yellow-300 text-xs lg:text-sm font-black text-right">
-                    100%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+          ) : (
+            <RandomDraw
+              isDrawing={isDrawing}
+              winner={winner}
+              displayName={displayName}
+            />
+          )}
+        </ScopePanel>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .waveMove {
-          stroke-dasharray: 40 18;
-          animation: waveDash 0.7s linear infinite;
+          stroke-dasharray: 80 18;
+          animation: waveDash 0.8s linear infinite;
         }
 
         @keyframes waveDash {
@@ -380,7 +214,63 @@ export default function Home() {
           }
 
           to {
-            stroke-dashoffset: -58;
+            stroke-dashoffset: -98;
+          }
+        }
+
+        .scopeScan {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 120px;
+
+          background: linear-gradient(
+            90deg,
+            rgba(34,211,238,0) 0%,
+            rgba(34,211,238,0.08) 25%,
+            rgba(34,211,238,0.18) 55%,
+            rgba(34,211,238,0.25) 78%,
+            rgba(255,255,255,0.95) 88%,
+            rgba(34,211,238,0.15) 94%,
+            rgba(34,211,238,0) 100%
+          );
+
+          filter: blur(1px);
+          animation: scopeMove 2s linear infinite;
+          pointer-events: none;
+          z-index: 10;
+        }
+
+        .scopeScanYellow {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 120px;
+
+          background: linear-gradient(
+            90deg,
+            rgba(253,224,71,0) 0%,
+            rgba(253,224,71,0.08) 25%,
+            rgba(253,224,71,0.18) 55%,
+            rgba(253,224,71,0.45) 78%,
+            rgba(255,255,255,0.95) 88%,
+            rgba(253,224,71,0.15) 94%,
+            rgba(253,224,71,0) 100%
+          );
+
+          filter: blur(1px);
+          animation: scopeMove 2s linear infinite;
+          pointer-events: none;
+          z-index: 10;
+        }
+
+        @keyframes scopeMove {
+          from {
+            transform: translateX(-150px);
+          }
+
+          to {
+            transform: translateX(1200px);
           }
         }
 
@@ -419,6 +309,10 @@ export default function Home() {
             opacity: 0;
             transform: translateY(-18px);
           }
+        }
+
+        .wheelSpinBlur {
+          filter: blur(1.2px);
         }
       `}</style>
     </div>
