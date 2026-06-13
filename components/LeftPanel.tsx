@@ -2,8 +2,8 @@ type Props = {
   namesText: string;
   setNamesText: (value: string) => void;
 
-  drawMode: "random" | "wheel";
-  setDrawMode: (mode: "random" | "wheel") => void;
+  drawMode: "random" | "wheel" | "boss" | "box";
+  setDrawMode: (mode: "random" | "wheel" | "boss" | "box") => void;
 
   history: string[];
 
@@ -56,7 +56,7 @@ export default function LeftPanel({
             value={drawMode}
             onChange={(e) =>
               setDrawMode(
-                e.target.value as "random" | "wheel"
+                e.target.value as "random" | "wheel" | "boss" | "box"
               )
             }
             className="w-full rounded-lg bg-[#061626] border border-cyan-400/40 p-3 outline-none focus:border-cyan-200 text-white"
@@ -68,6 +68,15 @@ export default function LeftPanel({
             <option value="wheel">
               圓餅圖抽籤
             </option>
+
+            <option value="boss">
+              DON點名
+            </option>
+
+            <option value="box">
+              白紙選一選
+            </option>   
+
           </select>
         </div>
 

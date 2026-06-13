@@ -6,6 +6,8 @@ import LeftPanel from "@/components/LeftPanel";
 import RandomDraw from "@/components/RandomDraw";
 import ScopePanel from "@/components/ScopePanel";
 import WheelDraw from "@/components/WheelDraw";
+import BossDraw from "@/components/BossDraw";
+import BoxDraw from "@/components/4_BoxDraw";
 
 import type { DrawMode } from "@/types/draw";
 
@@ -42,6 +44,8 @@ export default function Home() {
   useState(0);
   const [activeWheelNames, setActiveWheelNames] =
     useState<string[]>([]);
+  const [boxRound, setBoxRound] =
+    useState(0);
 
   const names = useMemo(() => {
     return namesText
@@ -70,6 +74,18 @@ export default function Home() {
     setIsDrawing(true);
 
     const finalWinners = shuffle(pool).slice(0, 2);
+
+    if (drawMode === "box") {
+      setWinner([]);
+
+      setBoxRound((prev) => prev + 1);
+
+      setDisplayName("請選兩張白紙");
+
+      setIsDrawing(false);
+
+      return;
+    }
 
     if (drawMode === "wheel") {
       setDisplayName("WHEEL SPINNING...");
@@ -182,6 +198,7 @@ const wheelDisplayNames =
         <ScopePanel
           isDrawing={isDrawing}
           winner={winner}
+          drawMode={drawMode}
         >
           {drawMode === "wheel" ? (
             <WheelDraw
@@ -191,6 +208,32 @@ const wheelDisplayNames =
               displayName={displayName}
               wheelRotation={wheelRotation}
               pointerRotation={pointerRotation}
+            />
+          ) : drawMode === "boss" ? (
+            <BossDraw
+              isDrawing={isDrawing}
+              winner={winner}
+              displayName={displayName}
+            />
+          ) : drawMode === "box" ? (
+            <BoxDraw
+              names={wheelDisplayNames}
+              round={boxRound}
+              onComplete={(winners) => {
+                const newRecord =
+                  createHistoryRecord(winners);
+
+                const nextHistory = [
+                  ...historyRef.current,
+                  newRecord,
+                ];
+
+                historyRef.current = nextHistory;
+
+                setWinner(winners);
+                setDisplayName(newRecord);
+                setHistory(nextHistory);
+              }}
             />
           ) : (
             <RandomDraw

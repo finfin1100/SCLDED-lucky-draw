@@ -1,13 +1,15 @@
 type Props = {
-  children: React.ReactNode;
   isDrawing: boolean;
   winner: string[];
+  drawMode: string;
+  children: React.ReactNode;
 };
 
 export default function ScopePanel({
-  children,
   isDrawing,
   winner,
+  drawMode,
+  children,
 }: Props) {
   return (
     <div className="relative rounded-2xl border border-cyan-400/30 bg-[#03101f]/90 p-8 overflow-hidden">
@@ -45,10 +47,12 @@ export default function ScopePanel({
         </section>
 
         <section className="relative border border-cyan-400/30 rounded-2xl bg-black/30 min-h-[330px] flex flex-col items-center justify-center shadow-[0_0_45px_rgba(34,211,238,.12)] overflow-hidden">
-          <div className="absolute inset-0 opacity-40 bg-[linear-gradient(90deg,transparent,rgba(34,211,238,.12),transparent)] animate-[scan_2s_linear_infinite]" />
+          <div className="absolute inset-0 opacity-40 bg-[linear-gradient(90deg,transparent,rgba(34,211,238,.12),transparent)] animate-[scan_2s_linear_infinite] pointer-events-none" />
 
           <div className="absolute top-5 text-cyan-300 tracking-[0.25em] text-sm font-black">
-            {isDrawing
+            {drawMode === "box"
+              ? ""
+              : isDrawing
               ? "SIGNAL PROPAGATING"
               : winner.length
               ? "FINAL WINNER"

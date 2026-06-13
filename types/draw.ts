@@ -1,4 +1,8 @@
-export type DrawMode = "random" | "wheel";
+export type DrawMode =
+  | "random"
+  | "wheel"
+  | "boss"
+  | "box";
 
 export type DrawStatus = {
   displayName: string;
