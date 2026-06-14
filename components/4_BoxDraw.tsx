@@ -126,7 +126,7 @@ export default function BoxDraw({
           >
             {isShuffling
               ? "..."
-              : round > 0 && !isSelected
+              : round > 0 && canChoose && !isSelected
               ? "?"
               : name}
           </button>

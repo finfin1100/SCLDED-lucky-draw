@@ -3,10 +3,10 @@
 import { useMemo, useRef, useState } from "react";
 
 import LeftPanel from "@/components/LeftPanel";
-import RandomDraw from "@/components/RandomDraw";
+import RandomDraw from "@/components/1_RandomDraw";
 import ScopePanel from "@/components/ScopePanel";
-import WheelDraw from "@/components/WheelDraw";
-import BossDraw from "@/components/BossDraw";
+import WheelDraw from "@/components/2_WheelDraw";
+import BossDraw from "@/components/3_BossDraw";
 import BoxDraw from "@/components/4_BoxDraw";
 
 import type { DrawMode } from "@/types/draw";
