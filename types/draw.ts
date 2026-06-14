@@ -2,7 +2,8 @@ export type DrawMode =
   | "random"
   | "wheel"
   | "boss"
-  | "box";
+  | "box"
+  | "ladder";
 
 export type DrawStatus = {
   displayName: string;

@@ -8,6 +8,7 @@ import ScopePanel from "@/components/ScopePanel";
 import WheelDraw from "@/components/2_WheelDraw";
 import BossDraw from "@/components/3_BossDraw";
 import BoxDraw from "@/components/4_BoxDraw";
+import LadderDraw from "@/components/5_LadderDraw";
 
 import type { DrawMode } from "@/types/draw";
 
@@ -46,6 +47,12 @@ export default function Home() {
     useState<string[]>([]);
   const [boxRound, setBoxRound] =
     useState(0);
+  const [ladderRound, setLadderRound] =
+    useState(0);
+  const [pendingLadderWinners, setPendingLadderWinners] =
+    useState<string[]>([]);
+  const [pendingBoxWinners, setPendingBoxWinners] =
+    useState<string[]>([]);
 
   const names = useMemo(() => {
     return namesText
@@ -54,15 +61,51 @@ export default function Home() {
       .filter(Boolean);
   }, [namesText]);
 
+  const commitPendingWinners = () => {
+    const newRecords: string[] = [];
+
+    if (pendingBoxWinners.length === 2) {
+      newRecords.push(
+        createHistoryRecord(pendingBoxWinners)
+      );
+    }
+
+    if (pendingLadderWinners.length === 2) {
+      newRecords.push(
+        createHistoryRecord(pendingLadderWinners)
+      );
+    }
+
+    if (newRecords.length === 0) {
+      return historyRef.current;
+    }
+
+    const nextHistory = [
+      ...historyRef.current,
+      ...newRecords,
+    ];
+
+    historyRef.current = nextHistory;
+    setHistory(nextHistory);
+
+    setPendingBoxWinners([]);
+    setPendingLadderWinners([]);
+
+    return nextHistory;
+  };
+
   const draw = () => {
     const uniqueNames = getUniqueNames(names);
 
     if (uniqueNames.length < 2 || isDrawing) return;
 
-    const pool = getAvailableNames(
-      uniqueNames,
-      historyRef.current
-    );
+  const committedHistory =
+    commitPendingWinners();
+
+  const pool = getAvailableNames(
+    uniqueNames,
+    committedHistory
+  );
 
     if (pool.length < 2) {
       setWinner([]);
@@ -74,6 +117,14 @@ export default function Home() {
     setIsDrawing(true);
 
     const finalWinners = shuffle(pool).slice(0, 2);
+
+    if (drawMode === "ladder") {
+      setWinner([]);
+      setDisplayName("請選下面兩條線");
+      setLadderRound((prev) => prev + 1);
+      setIsDrawing(false);
+      return;
+    }
 
     if (drawMode === "box") {
       setWinner([]);
@@ -171,10 +222,13 @@ export default function Home() {
       }
     }, 80);
   };
+const availableNames =
+  getAvailableNames(names, history);
+
 const wheelDisplayNames =
-  activeWheelNames.length > 0
+  drawMode === "wheel" && activeWheelNames.length > 0
     ? activeWheelNames
-    : getAvailableNames(names, history);
+    : availableNames;
     return (
     <div className="min-h-screen bg-[#020711] text-white overflow-hidden relative">
       <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,.07)_1px,transparent_1px)] bg-[size:32px_32px]" />
@@ -215,24 +269,24 @@ const wheelDisplayNames =
               winner={winner}
               displayName={displayName}
             />
+          ) : drawMode === "ladder" ? (
+            <LadderDraw
+              names={availableNames}
+              round={ladderRound}
+              onComplete={(winners) => {
+                setWinner(winners);
+                setDisplayName(winners.join(" × "));
+                setPendingLadderWinners(winners);
+              }}
+            />  
           ) : drawMode === "box" ? (
             <BoxDraw
-              names={wheelDisplayNames}
+              names={availableNames}
               round={boxRound}
               onComplete={(winners) => {
-                const newRecord =
-                  createHistoryRecord(winners);
-
-                const nextHistory = [
-                  ...historyRef.current,
-                  newRecord,
-                ];
-
-                historyRef.current = nextHistory;
-
                 setWinner(winners);
-                setDisplayName(newRecord);
-                setHistory(nextHistory);
+                setDisplayName(winners.join(" × "));
+                setPendingBoxWinners(winners);
               }}
             />
           ) : (
@@ -246,6 +300,13 @@ const wheelDisplayNames =
       </div>
 
       <style jsx global>{`
+
+        @keyframes ladderDraw {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+
         .waveMove {
           stroke-dasharray: 80 18;
           animation: waveDash 0.8s linear infinite;
