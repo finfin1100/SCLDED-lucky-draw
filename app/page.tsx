@@ -27,7 +27,7 @@ import {
 
 export default function Home() {
   const [namesText, setNamesText] = useState(
-    "FIN\n上軒\n有銘\n聖棋\n博之\n偉嘉\n嘉嶸\n宜潔\n薾云\n宜鳳\n雅玲\n江瑋\n平心\nPro Max\n棋淵\n隱1\n隱2\n隱3\n隱4\n隱5"
+    "FIN\n上軒\nYM\n聖棋\n博之\n偉嘉\n嘉嶸\n宜潔\n薾云\n宜鳳\n雅玲\n江瑋\n平心\nIphone.15\n祺淵\n博文\n奕恩\n佳偉\n韋豪\n承樸"
   );
 
   const [displayName, setDisplayName] = useState("");
