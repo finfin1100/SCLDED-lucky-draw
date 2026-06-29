@@ -35,6 +35,8 @@ export default function Home() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const historyRef = useRef<string[]>([]);
+  const [removeWinnerAfterDraw, setRemoveWinnerAfterDraw] =
+    useState(true);
 
   const [drawMode, setDrawMode] =
     useState<DrawMode>("random");
@@ -102,10 +104,9 @@ export default function Home() {
   const committedHistory =
     commitPendingWinners();
 
-  const pool = getAvailableNames(
-    uniqueNames,
-    committedHistory
-  );
+  const pool = removeWinnerAfterDraw
+    ? getAvailableNames(uniqueNames, committedHistory)
+    : uniqueNames;
 
     if (pool.length < 2) {
       setWinner([]);
@@ -222,8 +223,9 @@ export default function Home() {
       }
     }, 80);
   };
-const availableNames =
-  getAvailableNames(names, history);
+const availableNames = removeWinnerAfterDraw
+  ? getAvailableNames(names, history)
+  : getUniqueNames(names);
 
 const wheelDisplayNames =
   drawMode === "wheel" && activeWheelNames.length > 0
@@ -246,7 +248,9 @@ const wheelDisplayNames =
           history={history}
           onDraw={draw}
           isDrawing={isDrawing}
-          namesCount={names.length}
+          namesCount={availableNames.length}
+          removeWinnerAfterDraw={removeWinnerAfterDraw}
+          setRemoveWinnerAfterDraw={setRemoveWinnerAfterDraw}
         />
 
         <ScopePanel

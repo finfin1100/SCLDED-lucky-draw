@@ -11,6 +11,9 @@ type Props = {
 
   isDrawing: boolean;
   namesCount: number;
+
+  removeWinnerAfterDraw: boolean;
+  setRemoveWinnerAfterDraw: (value: boolean) => void;
 };
 
 export default function LeftPanel({
@@ -22,6 +25,8 @@ export default function LeftPanel({
   onDraw,
   isDrawing,
   namesCount,
+  removeWinnerAfterDraw,
+  setRemoveWinnerAfterDraw,
 }: Props) {
   return (
     <div className="rounded-2xl border border-cyan-400/30 bg-slate-950/80 p-5">
@@ -83,7 +88,35 @@ export default function LeftPanel({
 
           </select>
         </div>
+       
+        <div className="mb-4 rounded-lg border border-cyan-400/30 bg-black/30 p-3">
+          <div className="text-cyan-300 text-sm mb-2">
+            WINNER MODE
+          </div>
 
+          <button
+            type="button"
+            onClick={() =>
+              setRemoveWinnerAfterDraw(!removeWinnerAfterDraw)
+            }
+            className={`
+              w-full rounded-lg border px-4 py-3 font-black transition-all
+              ${
+                removeWinnerAfterDraw
+                  ? "bg-yellow-300 text-black border-yellow-100 shadow-[0_0_20px_rgba(250,204,21,.5)]"
+                  : "bg-cyan-500/10 text-cyan-300 border-cyan-300"
+              }
+            `}
+          >
+            {removeWinnerAfterDraw
+              ? "抽中後移除名單：ON"
+              : "抽中後移除名單：OFF"}
+          </button>
+
+          <div className="mt-2 text-xs text-white/50 leading-relaxed">
+            ON：抽過的人不會再出現。OFF：抽過的人仍可再次被抽到。
+          </div>
+        </div>
         <textarea
           value={namesText}
           onChange={(e) =>
